@@ -1,3 +1,4 @@
+#! /usr/bin/env python3
 import os
 import sys
 import subprocess
@@ -60,8 +61,8 @@ def main():
     wait(client)
     elapsed_time = time.time() - start_time
 
+    pretty_print(server)
     server.terminate()
-    pretty_print(client)
 
     print(f'Took {elapsed_time} seconds.')
 
