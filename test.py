@@ -1,12 +1,39 @@
-#! /usr/bin/env python3
 import os
 import sys
 import subprocess
 import time
 import argparse
 import signal
+import json
+import re
 
 from pyspin.spin import make_spin, Default
+ 
+class Host:
+    def __init__(self, name: str, addresses: list[str]):
+        self.name = name
+        self.addresses = addresses
+
+def get_hosts():
+    with open('topology.json') as file:
+        topology = json.load(file)
+        node_list = topology['elements']['nodes']
+
+        hostnames = [
+            node['data']['name']
+            for node in node_list
+            if node['data']['type'] == 'Host']
+
+        hosts = [
+            Host(name, [
+                node['data']['ip'].split('/')[0] #TODO: improve this
+                for node in node_list
+                if node['data']['type'] == 'Port' and node['data']['parent'] == name
+            ])
+
+            for name in hostnames]
+
+        return hosts
 
 
 @make_spin(Default, "Running...")
@@ -35,6 +62,13 @@ def run(command):
 def main():
     parser = argparse.ArgumentParser()
 
+    parser.add_argument('SOURCE',
+        help='source host for sending the probe',
+        type=str)
+    parser.add_argument('TARGET',
+        help='target host for sending the probe',
+        type=str)
+
     parser.add_argument('-s', '--speed', 
         help='amount of fragments sent per second',
         type=int,  default=5)
@@ -59,13 +93,19 @@ def main():
     }
     arguments = f'{args.speed} {args.payload_size*multiplier[args.unit]} {args.mtu} '
 
+    hosts = get_hosts()
+
+    target_address = next(x for x in hosts if x.name == args.TARGET).addresses[0]
+    #TODO: improve
+
     start_time = time.time()
-    server = run_scream('docker exec host2 /scripts/receive.py')
-    client = run(f'docker exec host1 /scripts/send.py 10.0.2.2 {arguments}')
+    server = run(f'docker exec {args.TARGET} /scripts/receive.py')
+    client = run(f'docker exec {args.SOURCE} /scripts/send.py {target_address} {arguments}')
     wait(client)
     elapsed_time = time.time() - start_time
 
     server.terminate()
+    pretty_print(server)
 
     print(f'Took {elapsed_time} seconds.')
 
