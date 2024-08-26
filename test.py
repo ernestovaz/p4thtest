@@ -4,6 +4,7 @@ import sys
 import subprocess
 import time
 import argparse
+import signal
 
 from pyspin.spin import make_spin, Default
 
@@ -14,11 +15,14 @@ def wait(process):
 
 
 def pretty_print(process):
-    output, errors = process.communicate()
-    for line in output.decode('utf-8').splitlines():
-        print(line)
-    for line in errors.decode('utf-8').splitlines():
-        print(line)
+    for line in process.stdout:
+        print(line.decode(), end='')
+
+def run_scream(command):
+    process = subprocess.Popen(
+        command.split(),
+        stderr=subprocess.PIPE)
+    return process
 
 def run(command):
     process = subprocess.Popen(
@@ -56,12 +60,11 @@ def main():
     arguments = f'{args.speed} {args.payload_size*multiplier[args.unit]} {args.mtu} '
 
     start_time = time.time()
-    server = run('docker exec host2 /scripts/receive.py')
+    server = run_scream('docker exec host2 /scripts/receive.py')
     client = run(f'docker exec host1 /scripts/send.py 10.0.2.2 {arguments}')
     wait(client)
     elapsed_time = time.time() - start_time
 
-    pretty_print(server)
     server.terminate()
 
     print(f'Took {elapsed_time} seconds.')
