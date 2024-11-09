@@ -9,12 +9,46 @@ import signal
 import json
 import re
 
-from pyspin.spin import make_spin, Default
+def main():
+    args = commandline_arguments()
+
+    payload_size = calculate_actual_payload_size(args.payload_size, args.unit)
+    payload_arguments = f'{args.speed} {payload_size} {args.mtu} '
+
+    hosts = get_hosts(args.file)
+    target_address = next(x for x in hosts if x.name == args.TARGET).addresses[0]
+
+    start_time = time.time()
+
+    server_command = f'docker exec {args.TARGET} ./scripts/receive.py'
+    client_command = f'docker exec {args.SOURCE} ./scripts/send.py {target_address} {payload_arguments}'
+    server = run(server_command)
+    client = run(client_command)
+
+    client.wait()
+    server.terminate()
+
+    if args.verbose:
+        print('[client]')
+        print(f'    {client_command}')
+        verbose_print(client)
+        print()
+        print('[server]')
+        print(f'    {server_command}')
+        verbose_print(server)
+    else:
+        normal_print(server)
+
+    if args.verbose:
+        elapsed_time = time.time() - start_time
+        print(f'took {elapsed_time} seconds')
  
+
 class Host:
     def __init__(self, name: str, addresses: list[str]):
         self.name = name
         self.addresses = addresses
+
 
 def get_hosts(topology_file):
     with open(topology_file) as file:
@@ -38,27 +72,7 @@ def get_hosts(topology_file):
         return hosts
 
 
-@make_spin(Default, "Running...")
-def wait(process):
-    process.wait()
-
-
-def pretty_print(process):
-    for line in process.stdout:
-        print(f'    {line.decode()}', end='')
-    print()
-    for line in process.stderr:
-        print(f'    {line.decode()}', end='')
-
-def run(command):
-    process = subprocess.Popen(
-        command.split(),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE)
-    return process
-
-
-def main():
+def commandline_arguments():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('SOURCE',
@@ -89,47 +103,42 @@ def main():
     parser.add_argument('-v', '--verbose', 
         action='store_true')
 
-    args = parser.parse_args()
-    multiplier = {
+    return parser.parse_args()
+
+# UTILS
+
+def verbose_print(process):
+    for line in process.stdout:
+        print(f'    {line.decode()}', end='')
+    print()
+    for line in process.stderr:
+        print(f'    {line.decode()}', end='')
+
+def normal_print(process):
+    for line in process.stdout:
+        print(f'{line.decode()}', end='')
+    for line in process.stderr:
+        print(f'{line.decode()}', end='')
+
+
+
+def calculate_actual_payload_size(raw_size, unit):
+    unit_multiplier = {
         'B' : 1,
         'KB' : 1024,
         'MB' : 1024**2,
         'GB' : 1024**3
     }
-    arguments = f'{args.speed} {args.payload_size*multiplier[args.unit]} {args.mtu} '
+    actual_size = raw_size * unit_multiplier[unit]
+    return actual_size
+    
 
-    hosts = get_hosts(args.file)
-
-    target_address = next(x for x in hosts if x.name == args.TARGET).addresses[0]
-
-    start_time = time.time()
-
-    server_command = f'docker exec {args.TARGET} ./scripts/receive.py'
-    client_command = f'docker exec {args.SOURCE} ./scripts/send.py {target_address} {arguments}'
-    server = run(server_command)
-    client = run(client_command)
-
-    #client = run(f'docker exec {args.SOURCE} /scripts/send.py 10.0.4.4 {arguments}')
-    #print(f'docker exec {args.SOURCE} /scripts/send.py 10.0.4.4 {arguments}')
-
-    wait(client)
-    server.terminate()
-
-    if args.verbose:
-
-        print('[client]')
-        print(f'    {client_command}')
-        pretty_print(client)
-        print()
-
-        print('[server]')
-        print(f'    {server_command}')
-        pretty_print(server)
-        print()
-
-    elapsed_time = time.time() - start_time
-
-    print(f'took {elapsed_time} seconds')
+def run(command):
+    process = subprocess.Popen(
+        command.split(),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE)
+    return process
 
 
 if __name__ == '__main__':

@@ -6,7 +6,7 @@ import socket
 import random
 import struct
 import time  
-from string import ascii_uppercase
+from string import ascii_uppercase, ascii_letters
 
 from scapy.all import Packet, bind_layers, BitField, ShortField, IntField, XByteField, PacketListField, FieldLenField, Raw, Ether, IP, TCP, sendp, get_if_hwaddr,get_if_list, sniff
 
@@ -45,7 +45,7 @@ class nodeCount(Packet):
 
 
 def generate_payload(size):
-    return ''.join(random.choice('@%#') for i in range(size))
+    return ''.join(random.choice(ascii_letters) for i in range(size))
 
 
 def main():
