@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 import sys
 import subprocess
@@ -43,13 +45,10 @@ def wait(process):
 
 def pretty_print(process):
     for line in process.stdout:
-        print(line.decode(), end='')
-
-def run_scream(command):
-    process = subprocess.Popen(
-        command.split(),
-        stderr=subprocess.PIPE)
-    return process
+        print(f'    {line.decode()}', end='')
+    print()
+    for line in process.stderr:
+        print(f'    {line.decode()}', end='')
 
 def run(command):
     process = subprocess.Popen(
@@ -87,6 +86,9 @@ def main():
         choices=['B', 'KB', 'MB', 'GB'], 
         type=str.upper, default='B')
 
+    parser.add_argument('-v', '--verbose', 
+        action='store_true')
+
     args = parser.parse_args()
     multiplier = {
         'B' : 1,
@@ -96,25 +98,38 @@ def main():
     }
     arguments = f'{args.speed} {args.payload_size*multiplier[args.unit]} {args.mtu} '
 
-    hosts = get_hosts()
+    hosts = get_hosts(args.file)
 
-    #target_address = next(x for x in hosts if x.name == args.TARGET).addresses[0]
-    #TODO: improve
+    target_address = next(x for x in hosts if x.name == args.TARGET).addresses[0]
 
     start_time = time.time()
-    #server = run(f'docker exec {args.TARGET} /scripts/receive.py')
-    #client = run(f'docker exec {args.SOURCE} /scripts/send.py {target_address} {arguments}')
-    client = run(f'docker exec {args.SOURCE} /scripts/send.py 10.0.4.4 {arguments}')
-    print(f'docker exec {args.SOURCE} /scripts/send.py 10.0.4.4 {arguments}')
+
+    server_command = f'docker exec {args.TARGET} ./scripts/receive.py'
+    client_command = f'docker exec {args.SOURCE} ./scripts/send.py {target_address} {arguments}'
+    server = run(server_command)
+    client = run(client_command)
+
+    #client = run(f'docker exec {args.SOURCE} /scripts/send.py 10.0.4.4 {arguments}')
+    #print(f'docker exec {args.SOURCE} /scripts/send.py 10.0.4.4 {arguments}')
 
     wait(client)
-    #server.terminate()
+    server.terminate()
 
-    pretty_print(client)
+    if args.verbose:
+
+        print('[client]')
+        print(f'    {client_command}')
+        pretty_print(client)
+        print()
+
+        print('[server]')
+        print(f'    {server_command}')
+        pretty_print(server)
+        print()
 
     elapsed_time = time.time() - start_time
 
-    print(f'Took {elapsed_time} seconds.')
+    print(f'took {elapsed_time} seconds')
 
 
 if __name__ == '__main__':

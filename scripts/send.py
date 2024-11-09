@@ -68,7 +68,7 @@ def main():
         print('pass 2 arguments: <destination> "<message>"')
         exit(1)
         
-    iface = "h1-p1-s1-p1"
+    iface = "host1-p1-sw1-p1"
     addr = socket.gethostbyname(sys.argv[1])
     bind_layers(TCP, nodeCount, dport = 80)
     if full_fragments > 0:

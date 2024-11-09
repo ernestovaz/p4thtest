@@ -73,7 +73,7 @@ docker exec host2 ip link set host2-p1-sw1-p2 promisc on
 docker exec host1 route add default gw 10.0.1.1
  docker exec host2 route add default gw 10.0.2.1
  docker exec sw1 sh -c 'echo 0 >> /proc/sys/net/ipv4/ip_forward' 
-docker exec sw1 sh -c 'nohup simple_switch  --thrift-port 50001  -i 1@sw1-p1-host1-p1  -i 2@sw1-p2-host2-p1 intv2.json --log-console >> /tmp/switch.log &' 
+docker exec sw1 sh -c 'nohup simple_switch  --thrift-port 50001  -i 1@sw1-p1-host1-p1  -i 2@sw1-p2-host2-p1 int_v2.json --log-console >> /tmp/switch.log &' 
 docker exec sw1 sh -c 'echo "table_add MyIngress.ipv4_lpm ipv4_forward 10.0.1.2/32  => 00:00:00:00:01:02 1" | simple_switch_CLI --thrift-port 50001'  
 docker exec sw1 sh -c 'echo "table_add MyIngress.ipv4_lpm ipv4_forward 10.0.2.2/32 =>  00:00:00:00:02:02 2" | simple_switch_CLI --thrift-port 50001'  
 docker exec sw1 sh -c 'echo "table_set_default MyEgress.swtrace add_swtrace  1" | simple_switch_CLI --thrift-port 50001'

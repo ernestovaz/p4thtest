@@ -52,7 +52,7 @@ def handle_pkt(pkt):
 def main():
     bind_layers(IP, nodeCount)
     split_layers(IP, TCP)
-    iface = 'h4-p1-sw2-p2'
+    iface = 'host2-p1-sw1-p2'
     print("sniffing on %s" % iface)
     sys.stdout.flush()
     sniff(iface = iface,
