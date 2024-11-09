@@ -6,7 +6,7 @@ import random
 import struct
 
 from time import sleep
-from scapy.all import Packet, bind_layers, XByteField, FieldLenField, BitField, ShortField, IntField, PacketListField, Ether, IP, UDP, sendp, get_if_hwaddr, get_if_list, sniff
+from scapy.all import Packet, bind_layers, XByteField, FieldLenField, BitField, ShortField, IntField, PacketListField, Ether, IP, TCP, sendp, get_if_hwaddr, get_if_list, sniff, split_layers
 
 
 def get_if():
@@ -34,8 +34,8 @@ class InBandNetworkTelemetry(Packet):
                     BitField("deq_qdepth", 0, 19)
                   ]
     """any thing after this packet is extracted is padding"""
-    def extract_padding(self, p):
-                return "", p
+    #def extract_padding(self, p):
+    #            return "", p
 
 class nodeCount(Packet):
   name = "nodeCount"
@@ -50,11 +50,12 @@ def handle_pkt(pkt):
 
 
 def main():
-    bind_layers(IP, nodeCount, proto = 253)
-    iface = 'host2-p1-sw1-p2'
+    bind_layers(IP, nodeCount)
+    split_layers(IP, TCP)
+    iface = 'h4-p1-sw2-p2'
     print("sniffing on %s" % iface)
     sys.stdout.flush()
-    sniff(filter = "ip proto 253", iface = iface,
+    sniff(iface = iface,
           prn = lambda x: handle_pkt(x))
 
 if __name__ == '__main__':

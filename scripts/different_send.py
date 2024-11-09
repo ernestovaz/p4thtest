@@ -8,7 +8,7 @@ import struct
 import time  
 from string import ascii_uppercase
 
-from scapy.all import Packet, bind_layers, BitField, ShortField, IntField, XByteField, PacketListField, FieldLenField, Raw, Ether, IP, UDP, sendp, get_if_hwaddr,get_if_list, sniff
+from scapy.all import Packet, bind_layers, BitField, ShortField, IntField, XByteField, PacketListField, FieldLenField, Raw, Ether, IP, TCP, sendp, get_if_hwaddr,get_if_list, sniff
 
 def get_if():
     ifs=get_if_list()
@@ -70,16 +70,17 @@ def main():
         
     iface = "host1-p1-sw1-p1"
     addr = socket.gethostbyname(sys.argv[1])
-    bind_layers(IP, nodeCount, proto = 253)
     if full_fragments > 0:
         full_pkt = (Ether(src=get_if_hwaddr(iface), dst="ff:ff:ff:ff:ff:ff") 
-            / IP(dst=addr, proto=253) / nodeCount(count = 0,INT=[])
+            / IP(dst=addr, proto=6) 
+            / TCP(dport=80, flags="S")
             / full_payload)
         full_pkt.show2()
 
     if partial_fragment_size > 0:
         partial_pkt = (Ether(src=get_if_hwaddr(iface), dst="ff:ff:ff:ff:ff:ff") 
-            / IP(dst=addr, proto=253) / nodeCount(count = 0,INT=[])
+            / IP(dst=addr, proto=6) 
+            / TCP(dport=80, flags="S")
             / partial_payload)
         partial_pkt.show2()
 

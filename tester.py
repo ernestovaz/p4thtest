@@ -14,8 +14,8 @@ class Host:
         self.name = name
         self.addresses = addresses
 
-def get_hosts():
-    with open('topology.json') as file:
+def get_hosts(topology_file):
+    with open(topology_file) as file:
         topology = json.load(file)
         node_list = topology['elements']['nodes']
 
@@ -69,6 +69,9 @@ def main():
         help='target host for sending the probe',
         type=str)
 
+    parser.add_argument('-f', '--file', 
+        help='topology file for tests, needed if one cannot be found in current directory', 
+        type=str, default='topology.json')
     parser.add_argument('-s', '--speed', 
         help='amount of fragments sent per second',
         type=int,  default=5)
@@ -95,17 +98,21 @@ def main():
 
     hosts = get_hosts()
 
-    target_address = next(x for x in hosts if x.name == args.TARGET).addresses[0]
+    #target_address = next(x for x in hosts if x.name == args.TARGET).addresses[0]
     #TODO: improve
 
     start_time = time.time()
-    server = run(f'docker exec {args.TARGET} /scripts/receive.py')
-    client = run(f'docker exec {args.SOURCE} /scripts/send.py {target_address} {arguments}')
-    wait(client)
-    elapsed_time = time.time() - start_time
+    #server = run(f'docker exec {args.TARGET} /scripts/receive.py')
+    #client = run(f'docker exec {args.SOURCE} /scripts/send.py {target_address} {arguments}')
+    client = run(f'docker exec {args.SOURCE} /scripts/send.py 10.0.4.4 {arguments}')
+    print(f'docker exec {args.SOURCE} /scripts/send.py 10.0.4.4 {arguments}')
 
-    server.terminate()
-    pretty_print(server)
+    wait(client)
+    #server.terminate()
+
+    pretty_print(client)
+
+    elapsed_time = time.time() - start_time
 
     print(f'Took {elapsed_time} seconds.')
 
