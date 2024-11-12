@@ -15,14 +15,17 @@ def pkt2dict(pkt):
         if '###' in line:
             if '|###' in line:
                 sublayer = line.strip('|#[] ')
-                packet_dict[layer][sublayer] = {}
+                if sublayer in packet_dict[layer]:
+                    packet_dict[layer][sublayer].append({})
+                else: 
+                    packet_dict[layer][sublayer] = [{}]
             else:
                 layer = line.strip('#[] ')
                 packet_dict[layer] = {}
         elif '=' in line:
             if '|' in line and 'sublayer' in locals():
                 key, val = line.strip('| ').split('=', 1)
-                packet_dict[layer][sublayer][key.strip()] = val.strip('\' ')
+                packet_dict[layer][sublayer][-1][key.strip()] = val.strip('\' ')
             else: 
                 key, val = line.split('=', 1)
                 val = val.strip('\' ')
@@ -76,14 +79,16 @@ def remove_raw_padding(packet):
 def handle_pkt(pkt):
     remove_raw_padding(pkt)
     print(json.dumps(pkt2dict(pkt)))
+    #pkt.show2()
     sys.stdout.flush()
 
 
 def main():
-    bind_layers(IP, nodeCount)
     split_layers(IP, TCP)
+    bind_layers(IP, nodeCount)
     bind_layers(nodeCount, TCP)
     iface = 'host2-p1-sw1-p2'
+    #iface = 'h4-p1-s2-p2'
     sys.stdout.flush()
     sniff(iface = iface,
           prn = lambda x: handle_pkt(x))

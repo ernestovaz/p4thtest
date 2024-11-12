@@ -1,0 +1,84 @@
+{
+  "errors": [
+    {
+      "type": "json_decode_error",
+      "message": "[Extra data: line 2 column 1 (char 1761)]: server returned [{\"Ethernet\": {\"dst\": \"00:00:00:00:02:02\", \"src\": \"ff:ff:ff:ff:ff:ff\", \"type\": \"IPv4\"}, \"IP\": {\"version\": 4, \"ihl\": 5, \"tos\": 0, \"len\": 1100, \"id\": 1, \"frag\": 0, \"ttl\": 63, \"proto\": \"tcp\", \"chksum\": 24744, \"src\": \"10.0.1.2\", \"dst\": \"10.0.2.2\"}, \"nodeCount\": {\"count\": 1, \"InBandNetworkTelemetry\": [{\"switchID_t\": \"1\", \"ingress_port\": \"1\", \"egress_port\": \"2\", \"egress_spec\": \"0\", \"ingress_global_timestamp\": \"1303040173\", \"egress_global_timestamp\": \"1303055511\", \"enq_timestamp\": \"1303054318\", \"enq_qdepth\": \"0\", \"deq_timedelta\": \"1330\", \"deq_qdepth\": \"0\"}]}, \"TCP\": {\"sport\": 0, \"dport\": \"ftp_data\", \"seq\": 5242880, \"ack\": 0, \"dataofs\": 0, \"reserved\": 0, \"window\": 20482, \"chksum\": 8192, \"urgptr\": 0, \"options\": []}, \"Raw\": {\"load\": \"GhqqlrEGLgsHEcYhwtpTzTflflVXlJtDKAsYKXRTxnJIPVIgRbjCiCAoBsiBmOdlTHydwpcUUTsOcRBWfZTyzTOiiYUUYzZQgJNUIWgmeRbOUkSsiXBiZtmuJXeonCHQglIuwwgVbeDiDjwplPqgKGthHutJKpEsIbjyrxICaqiBSMzstwwfgKXQIoMSNKJpfiMpWBmRDMPrdLhBFZvgirJtiwVWXzyjigijCPMFpaVvqDiRxEOMYusMvdBgiBpSjaYEUPCnrmystPWayxFUqBWyeWlxHSnyDlCyehXPVLgdMIarjBwXcHwyNyTQelfymrGqLMtbhNvpfiLPomHzjauFHIpMiVClrGSpxdBZuDlhaVkGfywiuzWpMSmysxvsMWormqYxoaPsFnRrFULSiVNTEPlYFVkYrvXsmjMFBMponBUmdLImItMfFiXpOutHgtWlrYoqKdszBcXJhyQQoZPwprqJlLfIcxaYZNvIUGuQZeqOKzRgtMKDicXQctHxRwOasHZzJscgTRKaIEwHnpSlXPhWZyqEtkvnevDNnIPbwzlyQbtOPzMORRHrDRsHaUJkYVxwOBNdcsZWaqnsAoSFMTtJYMBUXacpVFhzyTsbpymuOmWsTOMcViafiZnqtkAibiesZZYhzxprxMsfqRIKIVCHOJnhPrSbgYDVhdcQUTMTrdrcoOlKuGsgsXvSRmNlPxhYYDjWQbedooyKmmetMVHKAAJdhyxMeKDkSzehLaoIBkfLxMFnwUHzgmydzQTbBikNKfVTAuDdtPMxpTxYAnUUUQGUFlXcmEBvQAhrLCiILvtlMEodIcoxrNrPuxqcSrUrEsrrmZLWjMLHrSNtJSINxMxrNUUzhMraCAPfrxSnOHCxnzqFIRolNgHSCcfwYyRJqzfgZNUUHZItcwVNKqMhMPRZRBLcYLaTsJLNXlUIakTkwTIwoAdqvfYwJuwfRetMpqCtqJnAwEXlAKyVmubowNjsQtrPMunPEmsHbNyCgxNdGWrzTQLPcZqk\"}}\n{\"Ethernet\": {\"dst\": \"00:00:00:00:02:02\", \"src\": \"ff:ff:ff:ff:ff:ff\", \"type\": \"IPv4\"}, \"IP\": {\"version\": 4, \"ihl\": 5, \"tos\": 0, \"len\": 252, \"id\": 1, \"frag\": 0, \"ttl\": 63, \"proto\": \"tcp\", \"chksum\": 25592, \"src\": \"10.0.1.2\", \"dst\": \"10.0.2.2\"}, \"nodeCount\": {\"count\": 1, \"InBandNetworkTelemetry\": [{\"switchID_t\": \"1\", \"ingress_port\": \"1\", \"egress_port\": \"2\", \"egress_spec\": \"0\", \"ingress_global_timestamp\": \"1303071860\", \"egress_global_timestamp\": \"1303092659\", \"enq_timestamp\": \"1303091223\", \"enq_qdepth\": \"0\", \"deq_timedelta\": \"1672\", \"deq_qdepth\": \"0\"}]}, \"TCP\": {\"sport\": 0, \"dport\": \"ftp_data\", \"seq\": 5242880, \"ack\": 0, \"dataofs\": 0, \"reserved\": 0, \"window\": 20482, \"chksum\": 8192, \"urgptr\": 0, \"options\": []}, \"Raw\": {\"load\": \"AJFDtLdEWTifVNzonYANomiKPEuqtUzfoIJVkwNWgxGdgCjSvISuUJWSCmeFegwxvDMyTbatvNDXLJKHJaYcpouhrKwjaBYJOEEEjziZMVLHUVwezbnzJOuQOessOkDRzaxWCuYDvjciCVKQfokGDTRLZTcPveNKJHtQsNarYMeoHvUK\"}}\n]"
+    }
+  ],
+  "source": "host1",
+  "target": "host2",
+  "speed": 100,
+  "mtu": 1024,
+  "payload_size": 1200,
+  "unit": "B",
+  "received_packet": {},
+  "duration": 8.74040150642395,
+  "container_metrics": {
+    "sw1": {
+      "processes": "14",
+      "network_io": "0B / 0B",
+      "memory_usage": "0.04%",
+      "cpu_usage": "3.63%"
+    },
+    "host2": {
+      "processes": "4",
+      "network_io": "0B / 0B",
+      "memory_usage": "0.90%",
+      "cpu_usage": "120.38%"
+    },
+    "host1": {
+      "processes": "2",
+      "network_io": "0B / 0B",
+      "memory_usage": "0.24%",
+      "cpu_usage": "118.47%"
+    },
+    "h4": {
+      "processes": "6",
+      "network_io": "0B / 0B",
+      "memory_usage": "1.67%",
+      "cpu_usage": "0.00%"
+    },
+    "h3": {
+      "processes": "1",
+      "network_io": "0B / 0B",
+      "memory_usage": "0.01%",
+      "cpu_usage": "0.00%"
+    },
+    "h2": {
+      "processes": "1",
+      "network_io": "0B / 0B",
+      "memory_usage": "0.01%",
+      "cpu_usage": "0.00%"
+    },
+    "h1": {
+      "processes": "1",
+      "network_io": "0B / 0B",
+      "memory_usage": "0.01%",
+      "cpu_usage": "0.00%"
+    },
+    "s3": {
+      "processes": "14",
+      "network_io": "0B / 0B",
+      "memory_usage": "0.04%",
+      "cpu_usage": "2.66%"
+    },
+    "s2": {
+      "processes": "14",
+      "network_io": "0B / 0B",
+      "memory_usage": "0.04%",
+      "cpu_usage": "3.23%"
+    },
+    "s1": {
+      "processes": "14",
+      "network_io": "0B / 0B",
+      "memory_usage": "0.04%",
+      "cpu_usage": "2.23%"
+    },
+    "s4": {
+      "processes": "14",
+      "network_io": "0B / 0B",
+      "memory_usage": "0.04%",
+      "cpu_usage": "4.11%"
+    }
+  }
+}

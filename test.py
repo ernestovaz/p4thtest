@@ -8,22 +8,31 @@ import argparse
 import signal
 import json
 import re
+ 
 
 def main():
-    args = commandline_arguments()
+    result = {}
+    result['errors'] = []
+
+    args = commandline_arguments(result)
 
     payload_size = calculate_actual_payload_size(args.payload_size, args.unit)
     payload_arguments = f'{args.speed} {payload_size} {args.mtu} '
 
     hosts = get_hosts(args.file)
-    target_address = next(x for x in hosts if x.name == args.TARGET).addresses[0]
+    if args.verbose:
+        for x in hosts: print(x)
+
+    target_address = next(x for x in hosts if x.name == args.TARGET).address
 
     start_time = time.time()
 
     server_command = f'docker exec {args.TARGET} ./scripts/receive.py'
     client_command = f'docker exec {args.SOURCE} ./scripts/send.py {target_address} {payload_arguments}'
+    stats_command  = 'docker stats --no-stream --format json'
     server = run(server_command)
     client = run(client_command)
+    stats  = run(stats_command)
 
     client.wait()
     server.terminate()
@@ -37,17 +46,23 @@ def main():
         print(f'    {server_command}')
         verbose_print(server)
     else:
-        normal_print(server)
+        read_data(server, result)
 
-    if args.verbose:
-        elapsed_time = time.time() - start_time
-        print(f'took {elapsed_time} seconds')
- 
+    elapsed_time = time.time() - start_time
+    result['duration'] = elapsed_time
+
+    stats.wait()
+    parse_stats(stats, result)
+
+    print(json.dumps(result))
+
 
 class Host:
-    def __init__(self, name: str, addresses: list[str]):
+    def __init__(self, name: str, address: str):
         self.name = name
-        self.addresses = addresses
+        self.address = address
+    def __str__(self):
+        return json.dumps({'name': self.name, 'address':self.address})
 
 
 def get_hosts(topology_file):
@@ -65,14 +80,12 @@ def get_hosts(topology_file):
                 node['data']['ip'].split('/')[0] #TODO: improve this
                 for node in node_list
                 if node['data']['type'] == 'Port' and node['data']['parent'] == name
-            ])
-
+            ][0])
             for name in hostnames]
-
         return hosts
 
 
-def commandline_arguments():
+def commandline_arguments(metadata_dict):
     parser = argparse.ArgumentParser()
 
     parser.add_argument('SOURCE',
@@ -103,9 +116,20 @@ def commandline_arguments():
     parser.add_argument('-v', '--verbose', 
         action='store_true')
 
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    metadata_dict['source'] = args.SOURCE
+    metadata_dict['target'] = args.TARGET
+    metadata_dict['speed'] = args.speed
+    metadata_dict['mtu'] = args.mtu
+    metadata_dict['payload_size'] = args.payload_size
+    metadata_dict['unit'] = args.unit
+
+    return args
+
 
 # UTILS
+
 
 def verbose_print(process):
     for line in process.stdout:
@@ -114,12 +138,42 @@ def verbose_print(process):
     for line in process.stderr:
         print(f'    {line.decode()}', end='')
 
-def normal_print(process):
-    for line in process.stdout:
-        print(f'{line.decode()}', end='')
-    for line in process.stderr:
-        print(f'{line.decode()}', end='')
 
+def read_data(process, result):
+    errors = process.stderr.read().decode('utf-8')
+    output = process.stdout.read().decode('utf-8')
+
+    if errors:
+        add_error_data(result, 'target_host_error', errors)
+
+    try: 
+        data = json.loads(output)
+        result['received_packet'] = data
+    except json.JSONDecodeError as e:
+        result['received_packet'] = {}
+        add_error_data(result, 'json_decode_error', f'[{e}]: server returned [{output}]')
+
+        
+def parse_stats(process, result):
+    stats = {}
+    for line in process.stdout:
+        container = json.loads(line)
+        stats[container['Name']] = {
+                'processes':    container['PIDs'],
+                'network_io':   container['NetIO'],
+                'memory_usage': container['MemPerc'],
+                'cpu_usage':    container['CPUPerc']
+        }
+    result['container_metrics'] = stats
+
+
+def add_error_data(result_dict, error_type, message):
+    errors = result_dict['errors']
+    errors.append({
+        'type': error_type,
+        'message': message
+    })
+    result_dict['errors'] = errors
 
 
 def calculate_actual_payload_size(raw_size, unit):

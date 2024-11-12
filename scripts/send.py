@@ -69,29 +69,25 @@ def main():
         exit(1)
         
     iface = "host1-p1-sw1-p1"
+    #iface = "h1-p1-s1-p1"
     addr = socket.gethostbyname(sys.argv[1])
     bind_layers(TCP, nodeCount, dport = 80)
     if full_fragments > 0:
         full_pkt = (Ether(src=get_if_hwaddr(iface), dst="ff:ff:ff:ff:ff:ff") 
             / IP(dst=addr, proto=6) 
-            / TCP(dport=80, flags="S")
             / nodeCount(count = 0,INT=[])
+            / TCP(dport=80, flags="S")
             / full_payload)
         full_pkt.show2()
 
     if partial_fragment_size > 0:
         partial_pkt = (Ether(src=get_if_hwaddr(iface), dst="ff:ff:ff:ff:ff:ff") 
             / IP(dst=addr, proto=6) 
-            / TCP(dport=80, flags="S")
             / nodeCount(count = 0,INT=[])
+            / TCP(dport=80, flags="S")
             / partial_payload)
         partial_pkt.show2()
 
-
-    #sendp(pkt, iface=iface)
-    #pkt.show2()
-    #hexdump(pkt)
-    
     try:
         if full_fragments > 0:
             sendp(full_pkt, iface=iface, inter=s_per_pkts, count=full_fragments)
